@@ -22,12 +22,14 @@ Default config:
 output_min_max_condition - Outputs the min/max conditions of any items that have a condition applied
 output_min_max_amount - Outputs the min/max amount of the item
 
-Aggrevated Probability - The complete total probablity for an item without factoring in additional subdefinitions and multiple items
+### Aggrevated Probability
+The complete total probablity for an item without factoring in additional subdefinitions and multiple items
 ```
 "rope": 22
 ```
 
-Regular Probability - The probability of items with separation of subdefinitions
+### Regular Probability
+The probability of items with separation of subdefinitions
 ```
 "rope,sewing kits": 11
 "rope,metal pipes": 11

@@ -1,6 +1,8 @@
 {
     "loot_files": [
-        "default_loottable.json"
+        "default_loottable.json",
+        "default_heli_loottable.json",
+        "default_bradley_loottable.json"
     ],
     "output_min_max_condition": true,
     "output_min_max_amount": true
