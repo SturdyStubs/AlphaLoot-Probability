@@ -15,7 +15,8 @@ Default config:
         "default_bradley_loottable.json"
     ],
     "output_min_max_condition": true,
-    "output_min_max_amount": true
+    "output_min_max_amount": true,
+    "round_percentages": false
 }
 ```
 
@@ -33,4 +34,11 @@ The probability of items with separation of subdefinitions
 ```
 "rope,sewing kits": 11
 "rope,metal pipes": 11
+```
+
+### Rounding Percentages
+round_percentages flag set to true will run through the output file before completing its cycle and round to the nearest .5
+```
+13.71 > 13.5
+13.76 > 14
 ```

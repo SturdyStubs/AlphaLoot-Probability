@@ -220,9 +220,18 @@ def aggregate_item_probabilities(loot_probabilities, output_min_max_condition=Tr
 
     return aggregated_probabilities
 
-def save_loot_probabilities_as_json(loot_probabilities, output_file):
+def save_loot_probabilities_as_json(loot_probabilities, output_file, round_percentages=False):
     os.makedirs("Output", exist_ok=True)
     output_path = os.path.join("Output", output_file)
+
+    if round_percentages:
+        for container, details in loot_probabilities.items():
+            if "Probabilities" in details:
+                for item, prob in details["Probabilities"].items():
+                    rounded_prob = round(prob * 2) / 2
+                    print(f"Rounding {item}: {prob} -> {rounded_prob}") # debug
+                    details["Probabilities"][item] = rounded_prob
+
     with open(output_path, 'w') as file:
         json.dump(loot_probabilities, file, indent=4)
 
@@ -232,11 +241,11 @@ def process_loot_files(config_file):
 
     output_min_max_condition = config.get("output_min_max_condition", True)
     output_min_max_amount = config.get("output_min_max_amount", True)
+    round_percentages = config.get("round_percentages", False)
 
     for loot_file in config["loot_files"]:
         input_file = loot_file
-
-        # Check if file exists, and if not, skip it
+        
         if not os.path.exists(input_file):
             print(f"File '{input_file}' not found. Skipping.")
             continue
@@ -249,8 +258,8 @@ def process_loot_files(config_file):
         loot_probabilities = calculate_loot_probabilities(loot_table, output_min_max_condition, output_min_max_amount)
         aggregated_probabilities = aggregate_item_probabilities(loot_probabilities, output_min_max_condition, output_min_max_amount)
 
-        save_loot_probabilities_as_json(loot_probabilities, output_file)
-        save_loot_probabilities_as_json(aggregated_probabilities, aggregated_output_file)
+        save_loot_probabilities_as_json(loot_probabilities, output_file, round_percentages)
+        save_loot_probabilities_as_json(aggregated_probabilities, aggregated_output_file, round_percentages)
 
         print(f"Saved loot probabilities to 'Output/{output_file}'")
         print(f"Saved aggregated loot probabilities to 'Output/{aggregated_output_file}'")
