@@ -1,0 +1,10 @@
+{
+    "loot_files": [
+        "1-5xmain_default_loottable.json",
+        "1-5xmain_default_heli_loottable.json",
+        "1-5xmain_default_bradley_loottable.json",
+        "default_loottable.json"
+    ],
+    "output_min_max_condition": true,
+    "output_min_max_amount": true
+}
