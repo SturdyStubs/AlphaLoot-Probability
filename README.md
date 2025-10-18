@@ -22,8 +22,8 @@ Default config:
 }
 ```
 
-output_min_max_condition - Outputs the min/max conditions of any items that have a condition applied
-output_min_max_amount - Outputs the min/max amount of the item
+output_min_max_condition - Outputs the min/max conditions of any items that have a condition applied\
+output_min_max_amount - Outputs the min/max amount of the item\
 include_scrap - Includes scrap amount and percentage in containers with scrap included
 
 ### Aggrevated Probability
