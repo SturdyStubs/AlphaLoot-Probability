@@ -16,12 +16,15 @@ Default config:
     ],
     "output_min_max_condition": true,
     "output_min_max_amount": true,
-    "round_percentages": false
+    "include_scrap": true,
+    "round_percentages": true,
+    "aggregated_probability": true
 }
 ```
 
 output_min_max_condition - Outputs the min/max conditions of any items that have a condition applied
 output_min_max_amount - Outputs the min/max amount of the item
+include_scrap - Includes scrap amount and percentage in containers with scrap included
 
 ### Aggrevated Probability
 The complete total probablity for an item without factoring in additional subdefinitions and multiple items
