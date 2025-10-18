@@ -26,7 +26,7 @@ output_min_max_condition - Outputs the min/max conditions of any items that have
 output_min_max_amount - Outputs the min/max amount of the item\
 include_scrap - Includes scrap amount and percentage in containers with scrap included
 
-### Aggrevated Probability
+### Aggregated Probability
 The complete total probablity for an item without factoring in additional subdefinitions and multiple items
 ```
 "rope": 22
