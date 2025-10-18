@@ -14,7 +14,10 @@ def check_or_create_config(config_file):
                 "default_bradley_loottable.json"
             ],
             "output_min_max_condition": True,
-            "output_min_max_amount": True
+            "output_min_max_amount": True,
+            "round_percentages": False,
+            "aggregated_probability": True,
+            "include_scrap": True
         }
 
         with open(config_file, 'w') as file:
@@ -108,7 +111,7 @@ def calculate_subspawn_percentage(subspawn_list, parent_probability=1.0, output_
 
     return percentages, amounts
 
-def calculate_loot_probabilities(loot_table, output_min_max_condition=True, output_min_max_amount=True):
+def calculate_loot_probabilities(loot_table, output_min_max_condition=True, output_min_max_amount=True, include_scrap=True):
     loot_probabilities = {}
 
     for container, details in loot_table.get("loot_advanced", {}).items():
@@ -117,11 +120,15 @@ def calculate_loot_probabilities(loot_table, output_min_max_condition=True, outp
         loops = details.get("Loops", 1)
 
         for slot in details.get("LootSpawnSlots", []):
-            subspawns = slot["LootDefinition"].get("SubSpawn", [])
-
+            if not isinstance(slot, dict):
+                continue
+            loot_def = slot.get("LootDefinition") or {}
+            if not isinstance(loot_def, dict):
+                loot_def = {}
+            subspawns = loot_def.get("SubSpawn", [])
             parent_probability = slot.get("Probability", 1)
 
-            if not subspawns and slot["LootDefinition"].get("Items"):
+            if not subspawns and loot_def.get("Items"):
                 percentages = {}
                 amounts = {}
 
@@ -130,7 +137,7 @@ def calculate_loot_probabilities(loot_table, output_min_max_condition=True, outp
                 max_combination_amounts = {}
                 conditions = {}
 
-                for item in slot["LootDefinition"]["Items"]:
+                for item in loot_def.get("Items", []):
                     shortname = item.get("Shortname", "Unknown")
                     max_amount = item.get("MaxAmount", 1)
                     min_amount = item.get("MinAmount", 1)
@@ -176,18 +183,30 @@ def calculate_loot_probabilities(loot_table, output_min_max_condition=True, outp
                 else:
                     container_amounts[combination] = amount
 
+        # normalize probabilities
+        for combination, percentage in container_probabilities.items():
+            container_probabilities[combination] = round(percentage, 2)
+
         scrap_info = {
             "MinScrap": details.get("MinScrapAmount", 0),
             "MaxScrap": details.get("MaxScrapAmount", 0)
         }
 
-        for combination, percentage in container_probabilities.items():
-            container_probabilities[combination] = round(percentage, 2)
+        if include_scrap:
+            has_min_key = "MinScrapAmount" in details
+            has_max_key = "MaxScrapAmount" in details
+            if has_min_key or has_max_key:
+                container_probabilities["scrap"] = 100.0
+                container_amounts["scrap"] = {
+                    "Min": {"scrap": scrap_info["MinScrap"]},
+                    "Max": {"scrap": scrap_info["MaxScrap"]},
+                    "Condition": {}
+                }
 
         loot_probabilities[container] = {
             "Probabilities": container_probabilities,
             "Amounts": container_amounts,
-            "ScrapInfo": scrap_info
+            "ScrapInfo": scrap_info if include_scrap else {"MinScrap": 0, "MaxScrap": 0}
         }
 
     return loot_probabilities
@@ -242,6 +261,8 @@ def process_loot_files(config_file):
     output_min_max_condition = config.get("output_min_max_condition", True)
     output_min_max_amount = config.get("output_min_max_amount", True)
     round_percentages = config.get("round_percentages", False)
+    include_scrap = config.get("include_scrap", True)
+    aggregated_enabled = config.get("aggregated_probability", True)
 
     for loot_file in config["loot_files"]:
         input_file = loot_file
@@ -255,14 +276,20 @@ def process_loot_files(config_file):
 
         print(f"Processing {input_file}...")
         loot_table = load_loot_table(input_file)
-        loot_probabilities = calculate_loot_probabilities(loot_table, output_min_max_condition, output_min_max_amount)
-        aggregated_probabilities = aggregate_item_probabilities(loot_probabilities, output_min_max_condition, output_min_max_amount)
+        loot_probabilities = calculate_loot_probabilities(
+            loot_table,
+            output_min_max_condition,
+            output_min_max_amount,
+            include_scrap=include_scrap
+        )
 
         save_loot_probabilities_as_json(loot_probabilities, output_file, round_percentages)
-        save_loot_probabilities_as_json(aggregated_probabilities, aggregated_output_file, round_percentages)
-
         print(f"Saved loot probabilities to 'Output/{output_file}'")
-        print(f"Saved aggregated loot probabilities to 'Output/{aggregated_output_file}'")
+
+        if aggregated_enabled:
+            aggregated_probabilities = aggregate_item_probabilities(loot_probabilities, output_min_max_condition, output_min_max_amount)
+            save_loot_probabilities_as_json(aggregated_probabilities, aggregated_output_file, round_percentages)
+            print(f"Saved aggregated loot probabilities to 'Output/{aggregated_output_file}'")
 
 if __name__ == "__main__":
     config_file = 'config.json'
